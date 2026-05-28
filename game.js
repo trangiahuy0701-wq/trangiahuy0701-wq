@@ -479,8 +479,8 @@ const initGame = () => {
         overlay.querySelector('h2').setAttribute('data-text', 'Loser');
         startBtn.innerText = 'Try Again!';
         
-        // Submit score if player entered a name
-        const pName = playerNameInput.value.trim() || 'ANONYMOUS';
+        // Submit score if player entered a name (Convert to uppercase to avoid case-sensitive duplicates)
+        const pName = (playerNameInput.value.trim() || 'ANONYMOUS').toUpperCase();
         if (score > 0) {
             saveScore(pName, score);
         }
