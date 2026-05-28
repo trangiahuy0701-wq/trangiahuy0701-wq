@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gia Huy | Cybernetic Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 3D Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- UI Overlay -->
+    <div class="overlay">
+        <!-- Scanline Effect -->
+        <div class="scanline"></div>
+        
+        <header class="hud-header">
+            <h1 class="hud-title">TRAN NGUYEN GIA HUY</h1>
+            <div class="hud-subtitle">CYBERNETIC ENGINEER // FULL-STACK DEVELOPER</div>
+        </header>
+
+        <main class="hud-content">
+            <div class="hud-panel about-panel">
+                <div class="panel-header"><h2>[ SYSTEM LOGS ]</h2></div>
+                <div class="terminal-text">
+                    <p><span class="prompt">></span> INITIATING PILOT PROFILE...</p>
+                    <p><span class="prompt">></span> NAME: TRAN NGUYEN GIA HUY</p>
+                    <p><span class="prompt">></span> ALIAS: trangiahuy0701-wq</p>
+                    <p><span class="prompt">></span> STATUS: <span class="neon-green">ONLINE</span></p>
+                    <p><span class="prompt">></span> SPECIALTY: Web Systems, Deep Space UI.</p>
+                    <br>
+                    <p class="blink">_</p>
+                </div>
+                
+                <div class="skills-section mt-4">
+                    <h3>[ TECH RADAR ]</h3>
+                    <div class="tech-tags">
+                        <span class="tech-tag">JavaScript</span>
+                        <span class="tech-tag">React</span>
+                        <span class="tech-tag">Node.js</span>
+                        <span class="tech-tag">Three.js</span>
+                        <span class="tech-tag">Cyber-Sec</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-panel game-panel">
+                <div class="panel-header">
+                    <h2>[ DEFENSE SECTOR ]</h2>
+                    <span id="score-display">SCORE: 000000</span>
+                </div>
+                <div class="game-wrapper">
+                    <!-- The 2D Game Canvas -->
+                    <canvas id="game-canvas" width="600" height="400"></canvas>
+                    <div id="game-ui" class="game-overlay">
+                        <h2 class="glitch" data-text="CYBER STRIKER">CYBER STRIKER</h2>
+                        <button id="start-btn" class="cyber-btn">ENGAGE</button>
+                    </div>
+                </div>
+                <div class="game-controls">
+                    <p>[W][A][S][D] / ARROWS : NAVIGATE</p>
+                    <p>[SPACE] : FIRE PLASMA LASER</p>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="hud-footer">
+            <a href="https://github.com/trangiahuy0701-wq" target="_blank" class="cyber-btn-outline">ACCESS GITHUB</a>
+        </footer>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="main.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

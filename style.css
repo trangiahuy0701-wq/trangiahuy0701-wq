@@ -1,0 +1,266 @@
+:root {
+    --neon-blue: #00f0ff;
+    --neon-pink: #ff007f;
+    --neon-green: #39ff14;
+    --bg-color: #03010a;
+    --panel-bg: rgba(6, 12, 33, 0.6);
+    --border-color: rgba(0, 240, 255, 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    overflow: hidden; /* Hide scrollbars for full-screen 3D app */
+}
+
+/* 3D Canvas Background */
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none; /* Let clicks pass through */
+}
+
+/* Overlay UI */
+.overlay {
+    position: relative;
+    z-index: 10;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    pointer-events: none; /* Let mouse interact with 3D background if needed */
+}
+
+/* Scanline Effect */
+.scanline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,240,255,0.05) 50%, rgba(0,240,255,0.05));
+    background-size: 100% 4px;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.3;
+}
+
+/* Header */
+.hud-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 10px var(--neon-blue);
+    pointer-events: auto;
+}
+
+.hud-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3rem;
+    color: var(--neon-blue);
+    letter-spacing: 5px;
+    margin-bottom: 0.5rem;
+}
+
+.hud-subtitle {
+    font-size: 1.2rem;
+    color: var(--neon-pink);
+    letter-spacing: 8px;
+    text-shadow: 0 0 5px var(--neon-pink);
+}
+
+/* Main Content Layout */
+.hud-content {
+    display: flex;
+    flex: 1;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+}
+
+/* Glassmorphism Panels */
+.hud-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.1), inset 0 0 10px rgba(0, 240, 255, 0.05);
+}
+
+.panel-header h2 {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--neon-blue);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+/* Terminal Text */
+.terminal-text {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    line-height: 1.8;
+}
+
+.prompt {
+    color: var(--neon-pink);
+    font-weight: bold;
+}
+
+.neon-green {
+    color: var(--neon-green);
+    text-shadow: 0 0 5px var(--neon-green);
+}
+
+.blink {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Skills Tags */
+.tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.tech-tag {
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid var(--neon-blue);
+    padding: 0.3rem 0.8rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    text-shadow: 0 0 5px var(--neon-blue);
+    transition: all 0.3s;
+}
+
+.tech-tag:hover {
+    background: var(--neon-blue);
+    color: #000;
+}
+
+/* Game Panel */
+.game-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.game-panel .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#score-display {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--neon-pink);
+}
+
+.game-wrapper {
+    position: relative;
+    border: 2px solid var(--neon-blue);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #000;
+}
+
+#game-canvas {
+    display: block;
+}
+
+.game-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.game-overlay.hidden {
+    display: none;
+}
+
+.glitch {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3rem;
+    color: #fff;
+    text-shadow: 2px 0 var(--neon-pink), -2px 0 var(--neon-blue);
+    margin-bottom: 2rem;
+}
+
+.cyber-btn {
+    background: transparent;
+    border: 2px solid var(--neon-blue);
+    color: var(--neon-blue);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    padding: 0.5rem 2rem;
+    cursor: pointer;
+    text-shadow: 0 0 5px var(--neon-blue);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2), inset 0 0 10px rgba(0, 240, 255, 0.2);
+    transition: all 0.2s;
+}
+
+.cyber-btn:hover {
+    background: var(--neon-blue);
+    color: #000;
+    box-shadow: 0 0 20px var(--neon-blue), inset 0 0 20px var(--neon-blue);
+}
+
+.game-controls {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Footer */
+.hud-footer {
+    text-align: center;
+    margin-top: 2rem;
+    pointer-events: auto;
+}
+
+.cyber-btn-outline {
+    display: inline-block;
+    text-decoration: none;
+    color: var(--neon-pink);
+    border: 1px solid var(--neon-pink);
+    padding: 0.5rem 1.5rem;
+    font-family: 'Orbitron', sans-serif;
+    transition: all 0.3s;
+}
+
+.cyber-btn-outline:hover {
+    background: var(--neon-pink);
+    color: #000;
+    box-shadow: 0 0 15px var(--neon-pink);
+}
+
+.mt-4 { margin-top: 1rem; }
