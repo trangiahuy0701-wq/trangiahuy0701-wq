@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=slice&color=ff007f&height=300&section=header&text=TRAN%20NGUYEN%20GIA%20HUY&fontSize=35&animation=twinkling&fontColor=00f0ff&descColor=00f0ff&fontAlignY=40&desc=CYBERNETIC%20ENGINEER%20|%20FULL-STACK%20DEVELOPER&descAlignY=60&descAlign=50" />
+  <img src="galaxy-header.svg" alt="Galaxy 3D Header" />
 </div>
 
 <div align="center">
@@ -72,5 +72,5 @@ pilot:
 </p>
 
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=00f0ff&height=100&section=footer" />
+  <img src="galaxy-footer.svg" alt="Galaxy 3D Footer" />
 </div>
