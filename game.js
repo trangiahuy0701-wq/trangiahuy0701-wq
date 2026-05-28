@@ -100,11 +100,13 @@ const initGame = () => {
     }
 
     class Enemy {
-        constructor() {
+        constructor(difficulty = 1) {
             this.radius = Math.random() * 10 + 10;
             this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
             this.y = -this.radius;
-            this.speed = Math.random() * 2 + 1;
+            // Speed scales up with difficulty
+            let baseSpeed = Math.random() * 2 + 1;
+            this.speed = baseSpeed * (1 + (difficulty - 1) * 0.5); 
             this.color = '#39ff14'; // Neon green
         }
 
@@ -223,9 +225,15 @@ const initGame = () => {
         player.update();
         player.draw();
 
+        // Calculate Dynamic Difficulty
+        // For every 2000 points, difficulty increases by 1.
+        let difficulty = 1 + (score / 2000);
+        let spawnRate = 0.03 * difficulty;
+        if (spawnRate > 0.15) spawnRate = 0.15; // Cap maximum spawn rate
+
         // Spawn Enemies
-        if (Math.random() < 0.03 * timeScale) {
-            enemies.push(new Enemy());
+        if (Math.random() < spawnRate * timeScale) {
+            enemies.push(new Enemy(difficulty));
         }
 
         // Update Particles backwards
