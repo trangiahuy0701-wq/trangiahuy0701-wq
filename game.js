@@ -75,7 +75,8 @@ const initGame = () => {
     const mouse = {
         x: canvas.width / 2,
         y: canvas.height - 50,
-        isDown: false
+        isDown: false,
+        isActive: false
     };
 
     // Constants
@@ -122,22 +123,22 @@ const initGame = () => {
         }
 
         update() {
-            // Mouse follow logic (fast & smooth interpolation)
-            const dx = mouse.x - this.x;
-            const dy = mouse.y - this.y;
-            const dist = Math.hypot(dx, dy);
-            // Only follow if mouse is active (not at default position)
-            if (dist > 2 && (mouse.x !== canvas.width / 2 || mouse.y !== canvas.height - 50)) {
-                // Moves 25% of the distance per frame (nearly instant but smooth)
-                this.x += dx * 0.25 * timeScale * 60; 
-                this.y += dy * 0.25 * timeScale * 60;
+            if (mouse.isActive) {
+                // Mouse follow logic (fast & smooth interpolation)
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist > 2) {
+                    this.x += dx * 0.25 * timeScale * 60; 
+                    this.y += dy * 0.25 * timeScale * 60;
+                }
+            } else {
+                // Keyboard overrides
+                if ((keys.w || keys.ArrowUp) && this.y - this.height/2 > 0) this.y -= this.speed * timeScale;
+                if ((keys.s || keys.ArrowDown) && this.y + this.height/2 < canvas.height) this.y += this.speed * timeScale;
+                if ((keys.a || keys.ArrowLeft) && this.x - this.width/2 > 0) this.x -= this.speed * timeScale;
+                if ((keys.d || keys.ArrowRight) && this.x + this.width/2 < canvas.width) this.x += this.speed * timeScale;
             }
-
-            // Keyboard overrides
-            if ((keys.w || keys.ArrowUp) && this.y - this.height/2 > 0) this.y -= this.speed * timeScale;
-            if ((keys.s || keys.ArrowDown) && this.y + this.height/2 < canvas.height) this.y += this.speed * timeScale;
-            if ((keys.a || keys.ArrowLeft) && this.x - this.width/2 > 0) this.x -= this.speed * timeScale;
-            if ((keys.d || keys.ArrowRight) && this.x + this.width/2 < canvas.width) this.x += this.speed * timeScale;
 
             // Keep in bounds
             this.x = Math.max(this.width/2, Math.min(canvas.width - this.width/2, this.x));
@@ -376,6 +377,9 @@ const initGame = () => {
     window.addEventListener('keydown', (e) => {
         if (keys.hasOwnProperty(e.key)) {
             keys[e.key] = true;
+            if (['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                mouse.isActive = false; // Keyboard takes control
+            }
             if(['Space', 'ArrowUp', 'ArrowDown', ' '].includes(e.key)) e.preventDefault();
         }
     });
@@ -386,8 +390,11 @@ const initGame = () => {
     // Mouse Listeners for canvas
     canvas.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
-        mouse.x = e.clientX - rect.left;
-        mouse.y = e.clientY - rect.top;
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        mouse.x = (e.clientX - rect.left) * scaleX;
+        mouse.y = (e.clientY - rect.top) * scaleY;
+        mouse.isActive = true;
     });
     canvas.addEventListener('mousedown', () => mouse.isDown = true);
     canvas.addEventListener('mouseup', () => mouse.isDown = false);
