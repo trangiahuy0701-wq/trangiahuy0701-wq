@@ -123,8 +123,8 @@ const initGame = () => {
         }
 
         update() {
-            if (mouse.isActive) {
-                // Mouse follow logic (fast & smooth interpolation)
+            if (mouse.isActive && document.pointerLockElement !== canvas) {
+                // Fallback mouse follow logic if pointer lock is rejected or lost
                 const dx = mouse.x - this.x;
                 const dy = mouse.y - this.y;
                 const dist = Math.hypot(dx, dy);
@@ -132,7 +132,7 @@ const initGame = () => {
                     this.x += dx * 0.25 * timeScale * 60; 
                     this.y += dy * 0.25 * timeScale * 60;
                 }
-            } else {
+            } else if (!mouse.isActive) {
                 // Keyboard overrides
                 if ((keys.w || keys.ArrowUp) && this.y - this.height/2 > 0) this.y -= this.speed * timeScale;
                 if ((keys.s || keys.ArrowDown) && this.y + this.height/2 < canvas.height) this.y += this.speed * timeScale;
@@ -388,13 +388,30 @@ const initGame = () => {
     });
     
     // Mouse Listeners for canvas
-    canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        mouse.x = (e.clientX - rect.left) * scaleX;
-        mouse.y = (e.clientY - rect.top) * scaleY;
-        mouse.isActive = true;
+    document.addEventListener('mousemove', (e) => {
+        if (document.pointerLockElement === canvas) {
+            if (Math.abs(e.movementX) > 0 || Math.abs(e.movementY) > 0) {
+                 mouse.isActive = true;
+            }
+            if (mouse.isActive && player) {
+                // Hardware 1:1 mouse tracking
+                // Sensitive movement for fast response
+                player.x += e.movementX * 1.5;
+                player.y += e.movementY * 1.5;
+                
+                // Keep strictly in bounds instantly
+                player.x = Math.max(player.width/2, Math.min(canvas.width - player.width/2, player.x));
+                player.y = Math.max(player.height/2, Math.min(canvas.height - player.height/2, player.y));
+            }
+        } else {
+            // Fallback if not locked
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            mouse.x = (e.clientX - rect.left) * scaleX;
+            mouse.y = (e.clientY - rect.top) * scaleY;
+            mouse.isActive = true;
+        }
     });
     canvas.addEventListener('mousedown', () => mouse.isDown = true);
     canvas.addEventListener('mouseup', () => mouse.isDown = false);
@@ -421,6 +438,9 @@ const initGame = () => {
 
     function gameOver() {
         isPlaying = false;
+        if (document.pointerLockElement === canvas) {
+            document.exitPointerLock();
+        }
         cancelAnimationFrame(gameLoopId);
         overlay.classList.remove('hidden');
         overlay.querySelector('h2').innerText = 'Loser';
@@ -553,9 +573,16 @@ const initGame = () => {
         }
     }
 
-    startBtn.addEventListener('click', () => {
+    startBtn.addEventListener('click', async () => {
         if (isPlaying) return;
         
+        // Request Pointer Lock to capture mouse
+        try {
+            await canvas.requestPointerLock();
+        } catch (err) {
+            console.warn("Pointer lock failed or not supported:", err);
+        }
+
         // Optionally require a name
         const pName = playerNameInput.value.trim();
         if (!pName) {
