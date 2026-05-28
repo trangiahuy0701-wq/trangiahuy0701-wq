@@ -6,6 +6,50 @@ const initGame = () => {
     const scoreDisplay = document.getElementById('score-display');
     const startBtn = document.getElementById('start-btn');
     const overlay = document.getElementById('game-ui');
+    const playerNameInput = document.getElementById('player-name');
+    const leaderboardDiv = document.getElementById('leaderboard');
+    const leaderboardList = document.getElementById('leaderboard-list');
+
+    // Initialize Supabase
+    const supabaseUrl = 'https://eedipgtvopycaxztgpuj.supabase.co';
+    const supabaseKey = 'sb_publishable_XM6Uv0acZV9OjczTMYO-8w_h-X-L3Gh';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function fetchLeaderboard() {
+        try {
+            const { data, error } = await supabase
+                .from('leaderboard')
+                .select('name, score')
+                .order('score', { ascending: false })
+                .limit(10);
+            
+            if (error) throw error;
+            
+            if (data && data.length > 0) {
+                leaderboardDiv.classList.remove('hidden');
+                leaderboardList.innerHTML = data.map(entry => `<li><span>${entry.name}</span><span>${entry.score}</span></li>`).join('');
+            } else {
+                leaderboardDiv.classList.add('hidden');
+            }
+        } catch (err) {
+            console.error('Error fetching leaderboard:', err);
+        }
+    }
+
+    async function submitScore(name, finalScore) {
+        if (!name || finalScore <= 0) return;
+        try {
+            const { error } = await supabase
+                .from('leaderboard')
+                .insert([{ name: name, score: finalScore }]);
+            if (error) throw error;
+            fetchLeaderboard(); // Refresh list
+        } catch (err) {
+            console.error('Error submitting score:', err);
+        }
+    }
+
+    fetchLeaderboard();
 
     let gameLoopId;
     let isPlaying = false;
@@ -375,6 +419,12 @@ const initGame = () => {
         overlay.querySelector('h2').innerText = 'Loser';
         overlay.querySelector('h2').setAttribute('data-text', 'Loser');
         startBtn.innerText = 'Try Again!';
+        
+        // Submit score if player entered a name
+        const pName = playerNameInput.value.trim() || 'ANONYMOUS';
+        if (score > 0) {
+            submitScore(pName, score);
+        }
     }
 
     function animate(timestamp) {
@@ -498,6 +548,16 @@ const initGame = () => {
 
     startBtn.addEventListener('click', () => {
         if (isPlaying) return;
+        
+        // Optionally require a name
+        const pName = playerNameInput.value.trim();
+        if (!pName) {
+            playerNameInput.focus();
+            // Just flash it to show it's recommended
+            playerNameInput.style.borderColor = 'red';
+            setTimeout(() => playerNameInput.style.borderColor = 'var(--neon-pink)', 500);
+        }
+        
         startBtn.blur(); 
         cancelAnimationFrame(gameLoopId);
         resetGame();

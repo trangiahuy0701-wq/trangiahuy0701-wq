@@ -52,10 +52,21 @@
                     <span id="score-display">SCORE: 000000</span>
                 </div>
                 <div class="game-wrapper">
+                    <!-- Leaderboard Display -->
+                    <div id="leaderboard" class="leaderboard hidden">
+                        <h3>TOP PILOTS</h3>
+                        <ul id="leaderboard-list">
+                            <li>Loading...</li>
+                        </ul>
+                    </div>
+
                     <!-- The 2D Game Canvas -->
                     <canvas id="game-canvas" width="600" height="400"></canvas>
                     <div id="game-ui" class="game-overlay">
                         <h2 class="glitch" data-text="CYBER STRIKER">CYBER STRIKER</h2>
+                        <div class="flex-center" style="margin-bottom: 20px; margin-top: 0;">
+                            <input type="text" id="player-name" placeholder="ENTER ALIAS" maxlength="12" class="cyber-input">
+                        </div>
                         <button id="start-btn" class="cyber-btn">Start!</button>
                     </div>
                 </div>
@@ -73,6 +84,8 @@
 
     <!-- Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="main.js"></script>
     <script src="game.js"></script>
 </body>
