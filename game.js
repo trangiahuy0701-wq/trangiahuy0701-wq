@@ -207,9 +207,9 @@ const initGame = () => {
         
         gameLoopId = requestAnimationFrame(animate);
         
-        // Clear canvas with slight trail effect
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Clear canvas cleanly for transparent background
+        ctx.shadowBlur = 0;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Update & Draw Player
         player.update();
@@ -220,56 +220,65 @@ const initGame = () => {
             enemies.push(new Enemy());
         }
 
-        // Update Particles
-        particles.forEach((particle, index) => {
+        // Update Particles backwards
+        for (let i = particles.length - 1; i >= 0; i--) {
+            let particle = particles[i];
             if (particle.alpha <= 0) {
-                particles.splice(index, 1);
+                particles.splice(i, 1);
             } else {
                 particle.update();
                 particle.draw();
             }
-        });
+        }
 
-        // Update Projectiles
-        projectiles.forEach((projectile, pIndex) => {
-            projectile.update();
-            projectile.draw();
-
-            // Remove off-screen projectiles
-            if (projectile.y < 0) {
-                projectiles.splice(pIndex, 1);
+        // Update Projectiles backwards
+        for (let j = projectiles.length - 1; j >= 0; j--) {
+            let p = projectiles[j];
+            p.update();
+            p.draw();
+            if (p.y < 0) {
+                projectiles.splice(j, 1);
             }
-        });
+        }
 
-        // Update Enemies
-        enemies.forEach((enemy, eIndex) => {
+        // Update Enemies backwards
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            let enemy = enemies[i];
             enemy.update();
             enemy.draw();
 
             // Remove off-screen enemies
             if (enemy.y - enemy.radius > canvas.height) {
-                enemies.splice(eIndex, 1);
+                enemies.splice(i, 1);
+                continue;
             }
 
             // Collision: Projectile hits Enemy
-            projectiles.forEach((projectile, pIndex) => {
-                const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y);
-                if (dist - enemy.radius - projectile.radius < 0) {
+            let hit = false;
+            for (let j = projectiles.length - 1; j >= 0; j--) {
+                let p = projectiles[j];
+                const dist = Math.hypot(p.x - enemy.x, p.y - enemy.y);
+                if (dist < enemy.radius + p.radius) {
                     createParticles(enemy.x, enemy.y, enemy.color);
-                    enemies.splice(eIndex, 1);
-                    projectiles.splice(pIndex, 1);
+                    projectiles.splice(j, 1);
+                    hit = true;
                     score += 100;
                     updateScore();
+                    break;
                 }
-            });
+            }
+            if (hit) {
+                enemies.splice(i, 1);
+                continue;
+            }
 
             // Collision: Enemy hits Player
-            const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
-            if (dist - enemy.radius - player.width/2 < 0) {
+            const distToPlayer = Math.hypot(player.x - enemy.x, player.y - enemy.y);
+            if (distToPlayer < enemy.radius + player.width/2) {
                 createParticles(player.x, player.y, player.color);
                 gameOver();
             }
-        });
+        }
     }
 
     // Start Button Event
@@ -281,8 +290,7 @@ const initGame = () => {
     });
 
     // Initial clear
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
 
 window.addEventListener('DOMContentLoaded', initGame);

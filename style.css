@@ -181,7 +181,8 @@ body {
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
     border-radius: 4px;
     overflow: hidden;
-    background: #000;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(2px);
 }
 
 #game-canvas {
