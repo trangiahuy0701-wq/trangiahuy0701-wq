@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="galaxy-header.svg" alt="Galaxy 3D Header" />
+  <img src="galaxy-header.svg?v=2" alt="Galaxy 3D Header" />
 </div>
 
 <div align="center">
@@ -72,5 +72,5 @@ pilot:
 </p>
 
 <div align="center">
-  <img src="galaxy-footer.svg" alt="Galaxy 3D Footer" />
+  <img src="galaxy-footer.svg?v=2" alt="Galaxy 3D Footer" />
 </div>
