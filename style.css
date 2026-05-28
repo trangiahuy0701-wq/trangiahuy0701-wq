@@ -267,50 +267,42 @@ body {
 .mt-4 { margin-top: 1rem; }
 
 /* Leaderboard Styles */
-.leaderboard {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(0, 20, 40, 0.8);
-    border: 1px solid var(--neon-blue);
-    padding: 10px;
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
-    border-radius: 4px;
-    pointer-events: auto;
-    z-index: 5;
-    width: 160px;
-    backdrop-filter: blur(4px);
+.leaderboard-panel {
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
 }
-.leaderboard h3 {
-    color: var(--neon-blue);
-    font-size: 0.9rem;
-    margin: 0 0 10px 0;
-    text-align: center;
-    border-bottom: 1px solid var(--neon-blue);
-    padding-bottom: 5px;
-    font-family: 'Orbitron', sans-serif;
-}
-.leaderboard ul {
+
+.global-rank-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    font-size: 0.85rem;
 }
-.leaderboard li {
+
+.global-rank-list li {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 4px;
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(0, 240, 255, 0.2);
 }
-.leaderboard li span:first-child {
+
+.global-rank-list li:last-child {
+    border-bottom: none;
+}
+
+.global-rank-list li span:first-child {
     color: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 80px;
+    max-width: 130px;
 }
-.leaderboard li span:last-child {
+
+.global-rank-list li span:last-child {
     color: var(--neon-green);
-    font-family: 'Courier New', monospace;
+    font-family: 'Orbitron', monospace;
 }
 
 /* Cyber Input */

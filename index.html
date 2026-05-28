@@ -52,14 +52,6 @@
                     <span id="score-display">SCORE: 000000</span>
                 </div>
                 <div class="game-wrapper">
-                    <!-- Leaderboard Display -->
-                    <div id="leaderboard" class="leaderboard hidden">
-                        <h3>TOP PILOTS</h3>
-                        <ul id="leaderboard-list">
-                            <li>Loading...</li>
-                        </ul>
-                    </div>
-
                     <!-- The 2D Game Canvas -->
                     <canvas id="game-canvas" width="600" height="400"></canvas>
                     <div id="game-ui" class="game-overlay">
@@ -74,6 +66,14 @@
                     <p>[W][A][S][D] / ARROWS : NAVIGATE</p>
                     <p>[SPACE] : FIRE PLASMA LASER</p>
                 </div>
+            </div>
+
+            <!-- Global Leaderboard Panel -->
+            <div id="leaderboard" class="hud-panel leaderboard-panel">
+                <div class="panel-header"><h2>[ GLOBAL TOP ]</h2></div>
+                <ul id="leaderboard-list" class="global-rank-list">
+                    <li>Loading...</li>
+                </ul>
             </div>
         </main>
         
