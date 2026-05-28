@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="tech-header.svg" alt="Tech 3D Header" />
+  <img src="space-header.svg" alt="Space 3D Header" />
 </div>
 
 <div align="center">
@@ -72,5 +72,5 @@ pilot:
 </p>
 
 <div align="center">
-  <img src="tech-footer.svg" alt="Tech 3D Footer" />
+  <img src="space-footer.svg" alt="Space 3D Footer" />
 </div>

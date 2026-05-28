@@ -200,6 +200,6 @@ const footerSvg = `
 </svg>
 `;
 
-fs.writeFileSync('tech-header.svg', headerSvg);
-fs.writeFileSync('tech-footer.svg', footerSvg);
+fs.writeFileSync('space-header.svg', headerSvg);
+fs.writeFileSync('space-footer.svg', footerSvg);
 console.log('SVGs generated successfully!');
