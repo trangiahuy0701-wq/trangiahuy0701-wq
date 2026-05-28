@@ -201,9 +201,9 @@ const initGame = () => {
         isPlaying = false;
         cancelAnimationFrame(gameLoopId);
         overlay.classList.remove('hidden');
-        overlay.querySelector('h2').innerText = 'SYSTEM FAILURE';
-        overlay.querySelector('h2').setAttribute('data-text', 'SYSTEM FAILURE');
-        startBtn.innerText = 'REBOOT SYSTEM';
+        overlay.querySelector('h2').innerText = 'Loser';
+        overlay.querySelector('h2').setAttribute('data-text', 'Loser');
+        startBtn.innerText = 'Try Again!';
     }
 
     function animate(timestamp) {
