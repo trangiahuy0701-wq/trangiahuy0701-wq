@@ -283,6 +283,8 @@ const initGame = () => {
 
     // Start Button Event
     startBtn.addEventListener('click', () => {
+        if (isPlaying) return;
+        cancelAnimationFrame(gameLoopId);
         resetGame();
         overlay.classList.add('hidden');
         isPlaying = true;
