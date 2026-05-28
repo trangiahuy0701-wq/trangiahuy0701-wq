@@ -190,7 +190,7 @@ const initGame = () => {
     }
 
     function updateScore() {
-        scoreDisplay.innerText = \`SCORE: \${score.toString().padStart(6, '0')}\`;
+        scoreDisplay.innerText = `SCORE: ${score.toString().padStart(6, '0')}`;
     }
 
     function gameOver() {
