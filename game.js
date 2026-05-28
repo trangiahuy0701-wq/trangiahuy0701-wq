@@ -29,7 +29,7 @@ const initGame = () => {
                 leaderboardDiv.classList.remove('hidden');
                 leaderboardList.innerHTML = data.map(entry => `<li><span>${entry.name}</span><span>${entry.score}</span></li>`).join('');
             } else {
-                leaderboardDiv.classList.add('hidden');
+                leaderboardList.innerHTML = `<li><span style="color: #888;">NO RECORDS YET</span></li>`;
             }
         } catch (err) {
             console.error('Error fetching leaderboard:', err);
