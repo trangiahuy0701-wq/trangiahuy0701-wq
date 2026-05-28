@@ -78,13 +78,15 @@ const initGame = () => {
         }
 
         update() {
-            // Mouse follow logic (smooth interpolation)
+            // Mouse follow logic (fast & smooth interpolation)
             const dx = mouse.x - this.x;
             const dy = mouse.y - this.y;
             const dist = Math.hypot(dx, dy);
-            if (dist > 2) {
-                this.x += (dx / dist) * this.speed * timeScale * 1.5; // Slightly faster for mouse
-                this.y += (dy / dist) * this.speed * timeScale * 1.5;
+            // Only follow if mouse is active (not at default position)
+            if (dist > 2 && (mouse.x !== canvas.width / 2 || mouse.y !== canvas.height - 50)) {
+                // Moves 25% of the distance per frame (nearly instant but smooth)
+                this.x += dx * 0.25 * timeScale * 60; 
+                this.y += dy * 0.25 * timeScale * 60;
             }
 
             // Keyboard overrides
