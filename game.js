@@ -18,12 +18,29 @@ const initGame = () => {
     let projectiles = [];
     let enemies = [];
     let particles = [];
+    let powerups = [];
+    let explosions = [];
 
-    // Keys
+    // Input state
     const keys = {
         w: false, a: false, s: false, d: false,
         ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false,
         ' ': false
+    };
+    
+    const mouse = {
+        x: canvas.width / 2,
+        y: canvas.height - 50,
+        isDown: false
+    };
+
+    // Constants
+    const WEAPON_COLORS = {
+        normal: '#ff007f',
+        laser: '#00ffff',
+        spread: '#ffff00',
+        bomb: '#ff8800',
+        lightning: '#8800ff'
     };
 
     // Classes
@@ -36,13 +53,15 @@ const initGame = () => {
             this.speed = 5;
             this.color = '#00f0ff';
             this.cooldown = 0;
+            
+            this.weaponType = 'normal';
+            this.weaponLevel = 1;
         }
 
         draw() {
             ctx.save();
             ctx.translate(this.x, this.y);
             
-            // Draw futuristic ship
             ctx.fillStyle = this.color;
             ctx.shadowBlur = 10;
             ctx.shadowColor = this.color;
@@ -59,35 +78,91 @@ const initGame = () => {
         }
 
         update() {
+            // Mouse follow logic (smooth interpolation)
+            const dx = mouse.x - this.x;
+            const dy = mouse.y - this.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist > 2) {
+                this.x += (dx / dist) * this.speed * timeScale * 1.5; // Slightly faster for mouse
+                this.y += (dy / dist) * this.speed * timeScale * 1.5;
+            }
+
+            // Keyboard overrides
             if ((keys.w || keys.ArrowUp) && this.y - this.height/2 > 0) this.y -= this.speed * timeScale;
             if ((keys.s || keys.ArrowDown) && this.y + this.height/2 < canvas.height) this.y += this.speed * timeScale;
             if ((keys.a || keys.ArrowLeft) && this.x - this.width/2 > 0) this.x -= this.speed * timeScale;
             if ((keys.d || keys.ArrowRight) && this.x + this.width/2 < canvas.width) this.x += this.speed * timeScale;
 
-            if (keys[' '] && this.cooldown <= 0) {
+            // Keep in bounds
+            this.x = Math.max(this.width/2, Math.min(canvas.width - this.width/2, this.x));
+            this.y = Math.max(this.height/2, Math.min(canvas.height - this.height/2, this.y));
+
+            // Shooting
+            if ((keys[' '] || mouse.isDown) && this.cooldown <= 0) {
                 this.shoot();
-                this.cooldown = 15; // Frames between shots
+                // Cooldowns based on weapon type
+                const cooldowns = { normal: 15, laser: 20, spread: 25, bomb: 40, lightning: 10 };
+                this.cooldown = cooldowns[this.weaponType] || 15;
             }
             if (this.cooldown > 0) this.cooldown -= timeScale;
         }
 
         shoot() {
-            projectiles.push(new Projectile(this.x, this.y - this.height/2));
+            const bx = this.x;
+            const by = this.y - this.height/2;
+            let level = Math.min(this.weaponLevel, 5); // cap at level 5
+            
+            if (this.weaponType === 'normal') {
+                for(let i=0; i<level; i++) {
+                    const offset = (i - (level-1)/2) * 10;
+                    projectiles.push(new Projectile(bx + offset, by, 0, -10, 'normal'));
+                }
+            } else if (this.weaponType === 'spread') {
+                const numShots = 2 + level;
+                for(let i=0; i<numShots; i++) {
+                    const angle = -Math.PI/2 + (i - (numShots-1)/2) * 0.2;
+                    projectiles.push(new Projectile(bx, by, Math.cos(angle)*10, Math.sin(angle)*10, 'spread'));
+                }
+            } else if (this.weaponType === 'laser') {
+                for(let i=0; i<level; i++) {
+                    const offset = (i - (level-1)/2) * 15;
+                    projectiles.push(new Projectile(bx + offset, by, 0, -20, 'laser'));
+                }
+            } else if (this.weaponType === 'bomb') {
+                // Shoot 1 big bomb, level increases blast radius and speed
+                projectiles.push(new Projectile(bx, by, 0, -5 - level, 'bomb'));
+            } else if (this.weaponType === 'lightning') {
+                for(let i=0; i<level; i++) {
+                    // Fire in slight spread, but they will home in
+                    const vx = (Math.random() - 0.5) * 10;
+                    projectiles.push(new Projectile(bx, by, vx, -8, 'lightning'));
+                }
+            }
         }
     }
 
     class Projectile {
-        constructor(x, y) {
+        constructor(x, y, vx, vy, type) {
             this.x = x;
             this.y = y;
-            this.radius = 3;
-            this.speed = 10;
-            this.color = '#ff007f';
+            this.vx = vx;
+            this.vy = vy;
+            this.type = type;
+            this.color = WEAPON_COLORS[type] || '#fff';
+            
+            this.radius = type === 'bomb' ? 6 : 3;
+            if(type === 'laser') this.radius = 2; // thin
+            this.piercing = type === 'laser';
+            this.hitList = new Set(); // To track which enemies the laser already hit
         }
 
         draw() {
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            if (this.type === 'laser') {
+                ctx.rect(this.x - this.radius, this.y - 20, this.radius * 2, 40);
+            } else {
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            }
             ctx.fillStyle = this.color;
             ctx.shadowBlur = 10;
             ctx.shadowColor = this.color;
@@ -95,7 +170,101 @@ const initGame = () => {
         }
 
         update() {
-            this.y -= this.speed * timeScale;
+            if (this.type === 'lightning') {
+                // Homing behavior
+                let nearest = null;
+                let minDist = Infinity;
+                for (let e of enemies) {
+                    let d = Math.hypot(e.x - this.x, e.y - this.y);
+                    if (d < minDist) { minDist = d; nearest = e; }
+                }
+                if (nearest && minDist < 300) {
+                    let dx = nearest.x - this.x;
+                    let dy = nearest.y - this.y;
+                    let angle = Math.atan2(dy, dx);
+                    // Steer towards enemy
+                    this.vx += Math.cos(angle) * 1.5 * timeScale;
+                    this.vy += Math.sin(angle) * 1.5 * timeScale;
+                    // Cap speed
+                    let speed = Math.hypot(this.vx, this.vy);
+                    if (speed > 12) {
+                        this.vx = (this.vx / speed) * 12;
+                        this.vy = (this.vy / speed) * 12;
+                    }
+                }
+            }
+            
+            this.x += this.vx * timeScale;
+            this.y += this.vy * timeScale;
+        }
+    }
+
+    class Explosion {
+        constructor(x, y, radius) {
+            this.x = x;
+            this.y = y;
+            this.maxRadius = radius;
+            this.radius = 1;
+            this.alpha = 1;
+            this.color = WEAPON_COLORS['bomb'];
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.restore();
+        }
+        update() {
+            this.radius += 5 * timeScale;
+            this.alpha -= 0.05 * timeScale;
+        }
+    }
+
+    class PowerUp {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.radius = 8;
+            this.vy = 2;
+            
+            const rand = Math.random();
+            if (rand < 0.4) this.type = 'levelUp';
+            else if (rand < 0.55) this.type = 'spread';
+            else if (rand < 0.7) this.type = 'laser';
+            else if (rand < 0.85) this.type = 'bomb';
+            else this.type = 'lightning';
+            
+            this.color = this.type === 'levelUp' ? '#ffffff' : WEAPON_COLORS[this.type];
+        }
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            // Rotate powerup slightly
+            ctx.rotate(Date.now() / 200);
+            ctx.beginPath();
+            ctx.rect(-this.radius, -this.radius, this.radius*2, this.radius*2);
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = this.color;
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.strokeRect(-this.radius, -this.radius, this.radius*2, this.radius*2);
+            
+            // Draw letter inside
+            ctx.rotate(-Date.now() / 200);
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const text = this.type === 'levelUp' ? 'UP' : this.type[0].toUpperCase();
+            ctx.fillText(text, 0, 0);
+            ctx.restore();
+        }
+        update() {
+            this.y += this.vy * timeScale;
         }
     }
 
@@ -104,12 +273,10 @@ const initGame = () => {
             this.radius = Math.random() * 10 + 10;
             this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
             this.y = -this.radius;
-            // Speed scales up with difficulty
             let baseSpeed = Math.random() * 2 + 1;
             this.speed = baseSpeed * (1 + (difficulty - 1) * 0.5); 
-            this.color = '#39ff14'; // Neon green
+            this.color = '#39ff14';
         }
-
         draw() {
             ctx.beginPath();
             ctx.moveTo(this.x, this.y + this.radius);
@@ -126,7 +293,6 @@ const initGame = () => {
             ctx.fillStyle = 'rgba(57, 255, 20, 0.2)';
             ctx.fill();
         }
-
         update() {
             this.y += this.speed * timeScale;
         }
@@ -144,7 +310,6 @@ const initGame = () => {
             this.color = color;
             this.alpha = 1;
         }
-
         draw() {
             ctx.save();
             ctx.globalAlpha = this.alpha;
@@ -154,7 +319,6 @@ const initGame = () => {
             ctx.fill();
             ctx.restore();
         }
-
         update() {
             this.x += this.velocity.x * timeScale;
             this.y += this.velocity.y * timeScale;
@@ -162,26 +326,29 @@ const initGame = () => {
         }
     }
 
-    // Input Handling
+    // Input Listeners
     window.addEventListener('keydown', (e) => {
         if (keys.hasOwnProperty(e.key)) {
             keys[e.key] = true;
-            // Prevent scrolling when pressing space or arrows
             if(['Space', 'ArrowUp', 'ArrowDown', ' '].includes(e.key)) e.preventDefault();
         }
     });
-
     window.addEventListener('keyup', (e) => {
-        if (keys.hasOwnProperty(e.key)) {
-            keys[e.key] = false;
-        }
+        if (keys.hasOwnProperty(e.key)) { keys[e.key] = false; }
     });
+    
+    // Mouse Listeners for canvas
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+    });
+    canvas.addEventListener('mousedown', () => mouse.isDown = true);
+    canvas.addEventListener('mouseup', () => mouse.isDown = false);
+    canvas.addEventListener('mouseleave', () => mouse.isDown = false);
 
-    // Game Logic
     function createParticles(x, y, color) {
-        for(let i=0; i<10; i++) {
-            particles.push(new Particle(x, y, color));
-        }
+        for(let i=0; i<10; i++) particles.push(new Particle(x, y, color));
     }
 
     function resetGame() {
@@ -189,6 +356,8 @@ const initGame = () => {
         projectiles = [];
         enemies = [];
         particles = [];
+        powerups = [];
+        explosions = [];
         score = 0;
         updateScore();
     }
@@ -214,93 +383,120 @@ const initGame = () => {
         if (!timestamp) timestamp = performance.now();
         let deltaTime = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
-        if (deltaTime > 0.1) deltaTime = 0.016; // cap delta time
-        timeScale = deltaTime * 60; // normalize to 60fps pacing
+        if (deltaTime > 0.1) deltaTime = 0.016; 
+        timeScale = deltaTime * 60; 
         
-        // Clear canvas cleanly for transparent background
         ctx.shadowBlur = 0;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Update & Draw Player
         player.update();
         player.draw();
 
-        // Calculate Dynamic Difficulty
-        // For every 2000 points, difficulty increases by 1.
         let difficulty = 1 + (score / 2000);
         let spawnRate = 0.03 * difficulty;
-        if (spawnRate > 0.15) spawnRate = 0.15; // Cap maximum spawn rate
+        if (spawnRate > 0.15) spawnRate = 0.15; 
 
-        // Spawn Enemies
-        if (Math.random() < spawnRate * timeScale) {
-            enemies.push(new Enemy(difficulty));
+        if (Math.random() < spawnRate * timeScale) enemies.push(new Enemy(difficulty));
+
+        // Update arrays backwards
+        for (let i = particles.length - 1; i >= 0; i--) {
+            let p = particles[i];
+            if (p.alpha <= 0) particles.splice(i, 1);
+            else { p.update(); p.draw(); }
         }
 
-        // Update Particles backwards
-        for (let i = particles.length - 1; i >= 0; i--) {
-            let particle = particles[i];
-            if (particle.alpha <= 0) {
-                particles.splice(i, 1);
-            } else {
-                particle.update();
-                particle.draw();
+        for (let i = explosions.length - 1; i >= 0; i--) {
+            let e = explosions[i];
+            if (e.alpha <= 0) explosions.splice(i, 1);
+            else { e.update(); e.draw(); }
+        }
+
+        for (let i = powerups.length - 1; i >= 0; i--) {
+            let p = powerups[i];
+            p.update(); p.draw();
+            if (p.y > canvas.height) { powerups.splice(i, 1); continue; }
+            
+            // Collision with player
+            if (Math.hypot(p.x - player.x, p.y - player.y) < p.radius + player.width) {
+                if (p.type === 'levelUp') {
+                    player.weaponLevel++;
+                } else {
+                    player.weaponType = p.type;
+                    // Retain level when switching weapon
+                }
+                score += 500; updateScore();
+                powerups.splice(i, 1);
             }
         }
 
-        // Update Projectiles backwards
         for (let j = projectiles.length - 1; j >= 0; j--) {
             let p = projectiles[j];
-            p.update();
-            p.draw();
-            if (p.y < 0) {
+            p.update(); p.draw();
+            if (p.y < -50 || p.x < -50 || p.x > canvas.width + 50 || p.y > canvas.height + 50) {
                 projectiles.splice(j, 1);
             }
         }
 
-        // Update Enemies backwards
         for (let i = enemies.length - 1; i >= 0; i--) {
             let enemy = enemies[i];
-            enemy.update();
-            enemy.draw();
+            enemy.update(); enemy.draw();
 
-            // Remove off-screen enemies
-            if (enemy.y - enemy.radius > canvas.height) {
+            if (enemy.y - enemy.radius > canvas.height) { enemies.splice(i, 1); continue; }
+
+            // Explosion collision
+            let hitByExplosion = false;
+            for(let ex of explosions) {
+                if (Math.hypot(ex.x - enemy.x, ex.y - enemy.y) < ex.radius + enemy.radius) {
+                    hitByExplosion = true; break;
+                }
+            }
+            if (hitByExplosion) {
+                createParticles(enemy.x, enemy.y, enemy.color);
+                score += 100; updateScore();
+                if (Math.random() < 0.1) powerups.push(new PowerUp(enemy.x, enemy.y));
                 enemies.splice(i, 1);
                 continue;
             }
 
-            // Collision: Projectile hits Enemy
             let hit = false;
             for (let j = projectiles.length - 1; j >= 0; j--) {
                 let p = projectiles[j];
-                const dist = Math.hypot(p.x - enemy.x, p.y - enemy.y);
-                if (dist < enemy.radius + p.radius) {
+                // Prevent laser hitting same enemy multiple times per frame or sticking
+                if (p.piercing && p.hitList && p.hitList.has(enemy)) continue;
+
+                if (Math.hypot(p.x - enemy.x, p.y - enemy.y) < enemy.radius + p.radius * 2) { 
                     createParticles(enemy.x, enemy.y, enemy.color);
-                    projectiles.splice(j, 1);
                     hit = true;
-                    score += 100;
-                    updateScore();
+                    score += 100; updateScore();
+                    
+                    if (p.type === 'bomb') {
+                        explosions.push(new Explosion(p.x, p.y, 80 + player.weaponLevel * 20));
+                        projectiles.splice(j, 1);
+                    } else if (p.piercing) {
+                        p.hitList.add(enemy);
+                    } else {
+                        projectiles.splice(j, 1);
+                    }
                     break;
                 }
             }
+            
             if (hit) {
+                if (Math.random() < 0.1) powerups.push(new PowerUp(enemy.x, enemy.y));
                 enemies.splice(i, 1);
                 continue;
             }
 
-            // Collision: Enemy hits Player
-            const distToPlayer = Math.hypot(player.x - enemy.x, player.y - enemy.y);
-            if (distToPlayer < enemy.radius + player.width/2) {
+            if (Math.hypot(player.x - enemy.x, player.y - enemy.y) < enemy.radius + player.width/2) {
                 createParticles(player.x, player.y, player.color);
                 gameOver();
             }
         }
     }
 
-    // Start Button Event
     startBtn.addEventListener('click', () => {
         if (isPlaying) return;
-        startBtn.blur(); // Remove focus so spacebar doesn't trigger it again
+        startBtn.blur(); 
         cancelAnimationFrame(gameLoopId);
         resetGame();
         overlay.classList.add('hidden');
@@ -309,7 +505,6 @@ const initGame = () => {
         animate(performance.now());
     });
 
-    // Initial clear
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
 
