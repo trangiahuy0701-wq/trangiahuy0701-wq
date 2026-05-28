@@ -36,16 +36,48 @@ const initGame = () => {
         }
     }
 
-    async function submitScore(name, finalScore) {
-        if (!name || finalScore <= 0) return;
+    async function saveScore(pName, score) {
+        if (!pName || score <= 0) return;
+        
         try {
-            const { error } = await supabase
+            // Check if user already has scores
+            const { data: existingRecords, error: fetchErr } = await supabase
                 .from('leaderboard')
-                .insert([{ name: name, score: finalScore }]);
-            if (error) throw error;
+                .select('id, score')
+                .eq('name', pName)
+                .order('score', { ascending: false });
+
+            if (fetchErr) throw fetchErr;
+
+            if (existingRecords && existingRecords.length > 0) {
+                const bestRecord = existingRecords[0];
+                
+                // If new score is better, update the highest record
+                if (score > bestRecord.score) {
+                    await supabase
+                        .from('leaderboard')
+                        .update({ score: score, created_at: new Date().toISOString() })
+                        .eq('id', bestRecord.id);
+                }
+                
+                // Cleanup any duplicate entries for this player
+                if (existingRecords.length > 1) {
+                    const idsToDelete = existingRecords.slice(1).map(r => r.id);
+                    await supabase
+                        .from('leaderboard')
+                        .delete()
+                        .in('id', idsToDelete);
+                }
+            } else {
+                // First time playing, insert new record
+                await supabase
+                    .from('leaderboard')
+                    .insert([{ name: pName, score: score }]);
+            }
+            
             fetchLeaderboard(); // Refresh list
         } catch (err) {
-            console.error('Error submitting score:', err);
+            console.error('Error saving score:', err);
         }
     }
 
@@ -450,7 +482,7 @@ const initGame = () => {
         // Submit score if player entered a name
         const pName = playerNameInput.value.trim() || 'ANONYMOUS';
         if (score > 0) {
-            submitScore(pName, score);
+            saveScore(pName, score);
         }
     }
 
