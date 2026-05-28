@@ -11,14 +11,13 @@
 <h2 align="center">📡 SYSTEM STATUS: ONLINE</h2>
 
 <div align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=trangiahuy0701-wq&show_icons=true&theme=tokyonight&hide_border=false&border_radius=10&border_color=00f0ff&bg_color=0d1117" alt="GitHub Stats" />
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=trangiahuy0701-wq&theme=tokyonight&hide_border=false&border_radius=10&border_color=00f0ff&background=0d1117" alt="GitHub Streak" />
+  <img src="https://github-readme-activity-graph.vercel.app/graph?username=trangiahuy0701-wq&theme=tokyonight&bg_color=0d1117&color=00f0ff&line=00f0ff&point=ff007f&area=true&hide_border=false&custom_title=SYSTEM%20ACTIVITY%20TELEMETRY" width="800" alt="GitHub Activity Graph" />
 </div>
 
 <br>
 
 <div align="center">
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=trangiahuy0701-wq&layout=compact&theme=tokyonight&hide_border=false&border_radius=10&border_color=00f0ff&bg_color=0d1117" alt="Top Languages" />
+  <img src="https://github-readme-streak-stats.herokuapp.com/?user=trangiahuy0701-wq&theme=tokyonight&hide_border=false&border_radius=10&border_color=00f0ff&background=0d1117" alt="GitHub Streak" />
 </div>
 
 ---
