@@ -10,6 +10,8 @@ const initGame = () => {
     let gameLoopId;
     let isPlaying = false;
     let score = 0;
+    let lastTime = 0;
+    let timeScale = 1;
 
     // Game Entities
     let player;
@@ -57,16 +59,16 @@ const initGame = () => {
         }
 
         update() {
-            if ((keys.w || keys.ArrowUp) && this.y - this.height/2 > 0) this.y -= this.speed;
-            if ((keys.s || keys.ArrowDown) && this.y + this.height/2 < canvas.height) this.y += this.speed;
-            if ((keys.a || keys.ArrowLeft) && this.x - this.width/2 > 0) this.x -= this.speed;
-            if ((keys.d || keys.ArrowRight) && this.x + this.width/2 < canvas.width) this.x += this.speed;
+            if ((keys.w || keys.ArrowUp) && this.y - this.height/2 > 0) this.y -= this.speed * timeScale;
+            if ((keys.s || keys.ArrowDown) && this.y + this.height/2 < canvas.height) this.y += this.speed * timeScale;
+            if ((keys.a || keys.ArrowLeft) && this.x - this.width/2 > 0) this.x -= this.speed * timeScale;
+            if ((keys.d || keys.ArrowRight) && this.x + this.width/2 < canvas.width) this.x += this.speed * timeScale;
 
             if (keys[' '] && this.cooldown <= 0) {
                 this.shoot();
-                this.cooldown = 10; // Frames between shots
+                this.cooldown = 15; // Frames between shots
             }
-            if (this.cooldown > 0) this.cooldown--;
+            if (this.cooldown > 0) this.cooldown -= timeScale;
         }
 
         shoot() {
@@ -93,7 +95,7 @@ const initGame = () => {
         }
 
         update() {
-            this.y -= this.speed;
+            this.y -= this.speed * timeScale;
         }
     }
 
@@ -124,7 +126,7 @@ const initGame = () => {
         }
 
         update() {
-            this.y += this.speed;
+            this.y += this.speed * timeScale;
         }
     }
 
@@ -152,9 +154,9 @@ const initGame = () => {
         }
 
         update() {
-            this.x += this.velocity.x;
-            this.y += this.velocity.y;
-            this.alpha -= 0.02;
+            this.x += this.velocity.x * timeScale;
+            this.y += this.velocity.y * timeScale;
+            this.alpha -= 0.02 * timeScale;
         }
     }
 
@@ -202,10 +204,16 @@ const initGame = () => {
         startBtn.innerText = 'REBOOT SYSTEM';
     }
 
-    function animate() {
+    function animate(timestamp) {
         if (!isPlaying) return;
         
         gameLoopId = requestAnimationFrame(animate);
+        
+        if (!timestamp) timestamp = performance.now();
+        let deltaTime = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+        if (deltaTime > 0.1) deltaTime = 0.016; // cap delta time
+        timeScale = deltaTime * 60; // normalize to 60fps pacing
         
         // Clear canvas cleanly for transparent background
         ctx.shadowBlur = 0;
@@ -216,7 +224,7 @@ const initGame = () => {
         player.draw();
 
         // Spawn Enemies
-        if (Math.random() < 0.03) {
+        if (Math.random() < 0.03 * timeScale) {
             enemies.push(new Enemy());
         }
 
@@ -284,11 +292,13 @@ const initGame = () => {
     // Start Button Event
     startBtn.addEventListener('click', () => {
         if (isPlaying) return;
+        startBtn.blur(); // Remove focus so spacebar doesn't trigger it again
         cancelAnimationFrame(gameLoopId);
         resetGame();
         overlay.classList.add('hidden');
         isPlaying = true;
-        animate();
+        lastTime = performance.now();
+        animate(performance.now());
     });
 
     // Initial clear
