@@ -25,26 +25,34 @@
         <main class="hud-content">
             <div class="hud-panel about-panel">
                 <div class="panel-header"><h2>[ SYSTEM LOGS ]</h2></div>
-                <div class="terminal-text" style="font-size: 0.9rem; line-height: 1.6;">
+                <div class="terminal-text" style="font-size: 0.85rem; line-height: 1.6;">
                     <p><span class="prompt">></span> GAME: <span style="color: var(--neon-blue); font-weight: bold;">CYBER STRIKER</span></p>
                     <p><span class="prompt">></span> CREATOR: TRAN NGUYEN GIA HUY</p>
                     <p><span class="prompt">></span> STATUS: <span class="neon-green">ACTIVE</span></p>
                     <br>
-                    <p><span class="prompt">></span> <span style="color: var(--neon-pink);">[ MISSION RULES ]</span></p>
-                    <p style="padding-left: 15px;">- Survive the endless space assault.</p>
-                    <p style="padding-left: 15px;">- Enemies drop Power-Ups (10% chance).</p>
-                    <p style="padding-left: 15px;">- Difficulty scales dynamically every 2000 pts.</p>
+                    <p><span class="prompt">></span> <span style="color: var(--neon-pink);">[ MAP ZONES ]</span></p>
+                    <p style="padding-left: 10px;"><span style="color:#00f0ff">0–2999</span> : Cyber Space</p>
+                    <p style="padding-left: 10px;"><span style="color:#ff0055">3000+</span> &nbsp;: ⚠ Boss Zone</p>
+                    <p style="padding-left: 10px;"><span style="color:#aaaacc">6000+</span> &nbsp;: Meteor Belt</p>
+                    <p style="padding-left: 10px;"><span style="color:#ff8800">10000+</span>: Supernova</p>
+                    <p style="padding-left: 10px;"><span style="color:#ff3300">20000+</span>: Inferno</p>
+                    <br>
+                    <p><span class="prompt">></span> <span style="color: var(--neon-pink);">[ MECHANICS ]</span></p>
+                    <p style="padding-left: 10px;">- 3 Shields — hit = -1 shield</p>
+                    <p style="padding-left: 10px;">- Kill streak = COMBO x2~x8</p>
+                    <p style="padding-left: 10px;">- BOSS every 3000 pts (Phase 2 at 50% HP)</p>
                     <br>
                     <p><span class="prompt">></span> <span style="color: var(--neon-pink);">[ CONTROLS ]</span></p>
-                    <p style="padding-left: 15px;">- <b>MOUSE:</b> 1:1 Hardware Aiming (Pointer Lock)</p>
-                    <p style="padding-left: 15px;">- <b>CLICK (HOLD):</b> Auto-fire Weapon</p>
+                    <p style="padding-left: 10px;">- <b>MOUSE / WASD:</b> Move</p>
+                    <p style="padding-left: 10px;">- <b>CLICK / SPACE:</b> Fire</p>
                     <br>
                     <p><span class="prompt">></span> <span style="color: var(--neon-pink);">[ POWER-UPS ]</span></p>
-                    <p style="padding-left: 15px;"><span style="color: white; font-weight:bold;">[ UP ]</span>: Upgrade Weapon Level (Max 5)</p>
-                    <p style="padding-left: 15px;"><span style="color: yellow; font-weight:bold;">[ S ]</span> : Spread Shot</p>
-                    <p style="padding-left: 15px;"><span style="color: cyan; font-weight:bold;">[ L ]</span> : Piercing Laser</p>
-                    <p style="padding-left: 15px;"><span style="color: orange; font-weight:bold;">[ B ]</span> : Explosive Bomb</p>
-                    <p style="padding-left: 15px;"><span style="color: magenta; font-weight:bold;">[ L ]</span> : Homing Lightning Missile</p>
+                    <p style="padding-left: 10px;"><span style="color:white;font-weight:bold">[UP]</span> Weapon Level (Max 5)</p>
+                    <p style="padding-left: 10px;"><span style="color:yellow;font-weight:bold">[S]</span> Spread Shot</p>
+                    <p style="padding-left: 10px;"><span style="color:cyan;font-weight:bold">[L]</span> Piercing Laser</p>
+                    <p style="padding-left: 10px;"><span style="color:orange;font-weight:bold">[B]</span> Explosive Bomb</p>
+                    <p style="padding-left: 10px;"><span style="color:#aa00ff;font-weight:bold">[L]</span> Homing Missiles</p>
+                    <p style="padding-left: 10px;"><span style="color:#ffffff;font-weight:bold">⚡</span> Lightning BEAM</p>
                     <br>
                     <p class="blink">_</p>
                 </div>
@@ -91,6 +99,10 @@
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="main.js"></script>
-    <script src="game.js"></script>
+    <script src="js/game_audio.js"></script>
+    <script src="js/game_vars.js"></script>
+    <script src="js/game_classes.js"></script>
+    <script src="js/game_utils.js"></script>
+    <script src="js/game_core.js"></script>
 </body>
 </html>
